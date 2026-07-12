@@ -1,0 +1,69 @@
+{
+  "name": "vervian-standards",
+  "description": "Public subset of Vervian's engineering standards. Generated from a private source of truth.",
+  "version": "1.0.0",
+  "generated": "2026-07-12T03:29:20.312Z",
+  "sourceCommit": "9d8b14a4dd118cd4eba98b4546055b68f006087d",
+  "files": [
+    {
+      "path": "nfr/00-pr-nfr-review-checklist.md",
+      "title": "PR Non-Functional Review Checklist",
+      "bytes": 7012
+    },
+    {
+      "path": "nfr/coding-standards.md",
+      "title": "Coding Standards",
+      "bytes": 7114
+    },
+    {
+      "path": "nfr/accessibility.md",
+      "title": "Accessibility",
+      "bytes": 4922
+    },
+    {
+      "path": "nfr/testing-strategy.md",
+      "title": "Testing Strategy",
+      "bytes": 5425
+    },
+    {
+      "path": "nfr/performance.md",
+      "title": "Performance",
+      "bytes": 4037
+    },
+    {
+      "path": "nfr/reliability-availability.md",
+      "title": "Reliability & Availability",
+      "bytes": 7238
+    },
+    {
+      "path": "nfr/security.md",
+      "title": "Security",
+      "bytes": 14968
+    },
+    {
+      "path": "nfr/privacy-gdpr.md",
+      "title": "Privacy & GDPR",
+      "bytes": 7610
+    },
+    {
+      "path": "nfr/data-classification-retention.md",
+      "title": "Data Classification & Retention",
+      "bytes": 5397
+    },
+    {
+      "path": "nfr/release-management.md",
+      "title": "Release & Change Management",
+      "bytes": 5067
+    },
+    {
+      "path": "strategy/product-management.md",
+      "title": "Product Management at Vervian",
+      "bytes": 13279
+    },
+    {
+      "path": "strategy/design-system.md",
+      "title": "Design System",
+      "bytes": 4472
+    }
+  ]
+}
