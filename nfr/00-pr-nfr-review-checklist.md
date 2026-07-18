@@ -1,6 +1,6 @@
 # PR Non-Functional Review Checklist
 
-> Owner: Vervian · Last reviewed: 2026-06-05
+> Owner: Vervian · Last reviewed: 2026-07-18
 
 This checklist is the **gate** every pull request goes through. Skim it on every PR. For any item that *might* apply, click into the linked NFR or strategy doc and confirm.
 
@@ -79,6 +79,7 @@ If you are an AI assistant proposing a PR, walk this checklist explicitly in the
 ## Code quality & documentation · see [`coding-standards.md`](coding-standards.md)
 
 - [ ] **(blocking)** Reuse was checked. No new component, hook, utility, or pattern was created where one already exists.
+- [ ] The build-decision ladder was walked: does this need to exist at all, and is this the smallest option that works? Any new dependency states why the platform, stdlib, or an existing dependency did not fit (see [`coding-standards.md`](coding-standards.md#before-you-write-code-the-build-decision-ladder)).
 - [ ] **(blocking)** No hardcoded design values. Colours, spacing, type, radii, shadows, z-index reference tokens.
 - [ ] **(blocking)** Every new exported function, component, API handler, and shared utility has the documentation header (what it does, consumers, inputs, outputs/side effects, why). No dark code.
 - [ ] No duplicated logic introduced. Existing duplication found nearby is flagged.

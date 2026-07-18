@@ -1,6 +1,6 @@
 # Coding Standards
 
-> Owner: Vervian · Last reviewed: 2026-06-05
+> Owner: Vervian · Last reviewed: 2026-07-18
 >
 > **Scope:** All Vervian product code. Default stack is TypeScript with React (Next.js) on the front end and Node on the back end. Where a product uses something else, the principles still apply; the language-specific rules adapt.
 
@@ -29,6 +29,31 @@ We use atomic design so that **a single edit propagates across the entire applic
 - **Zero hardcoded design values.** Every color, font size, font weight, spacing, padding, margin, gap, border radius, shadow, line height, and z-index references a canonical token. No magic numbers, no one-off hex values.
 - If two components of the same kind use different values for the same thing, that is a bug. Fix it at the token/primitive level, not by patching one instance.
 - No file-copy sync scripts between the design system and apps. The shared package is the mechanism; copying defeats it.
+
+---
+
+## Before you write code: the build-decision ladder
+
+Every change starts at the cheapest option that works and only moves down a rung when the one above genuinely does not fit. Walk it in order, and state in the PR where you landed:
+
+1. **Does this need to exist?** If the requirement can be met without new code, meet it without new code. The best change is often no change.
+2. **Already in this codebase?** Reuse it. This is rule 1 above.
+3. **Standard library?** Use it before adding anything.
+4. **Native platform feature?** Prefer the platform over a new dependency.
+5. **An already-installed dependency?** Use what is already here before pulling in something new.
+6. **One line?** If a one-liner does it, write the one line, not an abstraction around it.
+7. **Only then:** the minimum that works.
+
+A new dependency is the second-to-last resort, not the first move. Adding one requires the same "what already-present option did you consider, and why did it not fit" answer that rule 1 demands (and it carries the checklist's license/SBOM obligations, see [`00-pr-nfr-review-checklist.md`](00-pr-nfr-review-checklist.md)).
+
+**The ladder trims solutions, never safety.** These are out of scope for reduction, always. Do not cut them to make a diff smaller:
+
+- Trust-boundary and input validation (see [`security.md`](security.md)).
+- Error handling and data-loss handling.
+- Security controls (see [`security.md`](security.md)).
+- Accessibility (see [`accessibility.md`](accessibility.md)).
+
+**Lazy about the solution, never about reading.** The ladder runs *after* you understand the problem, not instead of it. Read the code the change touches and trace the real flow before picking a rung. A small diff built on a misread of the code is worse than no change.
 
 ---
 
@@ -102,6 +127,7 @@ Rules for the documentation itself:
 
 ## How we verify
 
+- The build-decision ladder was walked: the change is the smallest option that works, and any new dependency states why the platform, stdlib, or an existing dependency did not fit. Safety (validation, error handling, security, accessibility) was not cut to shrink the diff.
 - The change reads as part of the surrounding code: same naming, same patterns, same idioms.
 - Lint and type-check pass. No new warnings.
 - Every new exported function, component, handler, and shared utility has the documentation header above.
@@ -113,3 +139,4 @@ Rules for the documentation itself:
 
 - Atomic design (Brad Frost) for the component model.
 - The reuse-first and no-dark-code posture is Vervian's, see `core-beliefs.md` and [`product-management.md`](../strategy/product-management.md).
+- The build-decision ladder and the "trims solutions, never safety" carve-out are adapted from ponytail (github.com/DietrichGebert/ponytail, MIT), reframed to Vervian's reuse-first posture. Its benchmark claims are not adopted as commitments.
