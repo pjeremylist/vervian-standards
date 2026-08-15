@@ -1,6 +1,6 @@
 # Security
 
-> Owner: Vervian · Last reviewed: 2026-06-10
+> Owner: Vervian · Last reviewed: 2026-08-14
 
 ## Scope
 
@@ -9,6 +9,26 @@ Applies to every Vervian product, every internal service, every build pipeline. 
 Vervian products run in environments where a compromise is not merely a data risk but a risk to core user workflows and to irreversible actions (data destroyed by ransomware, a compromised pipeline corrupting outputs, a leaked customer data file). The framing throughout is "a compromise on the critical path is the worst case, so design for it."
 
 A **critical path** here means any flow where failure causes data loss, breaks a core user flow, or triggers an irreversible action.
+
+### Separation of duties, and what replaces it
+
+Vervian is one person. Several controls below assume two sets of hands: an author and an independent reviewer, an operator and an auditor. Where that separation does not exist, the control is **not waived**. It is met by a compensating control, and the substitution is written down rather than assumed.
+
+| Control that assumes separation | Compensating control at single-owner scale |
+| :--- | :--- |
+| Independent review before merge | Automated gates that cannot be self-approved: required CI checks, SAST, secret scanning, branch protection. An AI assistant may review; it is never the approver (see [section 10](#10-ai-and-generated-code)). |
+| Independent access review | Written credential list, reviewed on a fixed date, with the date and the changes recorded (see [section 2](#2-authorization)). |
+| Segregation between the person who deploys and the person who approves | Release artifacts are built and deployed only by the release pipeline, never from a developer machine (see [section 12](#12-build-pipeline-and-release-integrity)). The pipeline is the second pair of hands. |
+| Independent audit of whether controls actually operate | Annual self-audit (`/vervian-security-audit`) with findings tracked to closure, plus the evidence retained under [How we verify](#how-we-verify). |
+
+Two consequences, both deliberate:
+
+- **Vervian states the honest position.** A customer reading this sees compensating controls, not an implied team.
+- **The same test applies to anyone Vervian assesses.** A small organisation is not non-compliant because it lacks role separation. The question is whether a compensating control exists and can be evidenced. Absence of headcount is not a finding. Absence of a control is.
+
+### Client engagements
+
+On a client engagement, the client's own security policy, tooling, and approved-AI list govern the work inside their environment. This document is the floor Vervian brings, not a replacement for their standard. Where the two differ, the stricter applies. Where Vervian's own systems are used on an engagement, `ai-tooling-policy.md` sets the boundary.
 
 ---
 
@@ -85,19 +105,44 @@ When connecting to an external service (analytics, error reporting, AI provider,
 
 ## 10. AI and generated code
 
+Two distinct exposures live here and they need separating: **AI used to build the software**, and **AI shipped inside the software**. The rules differ.
+
+### 10a. AI used to build the software
+
+- **(blocking)** All AI-generated code, configuration, and infrastructure-as-code is treated as untrusted input. It passes the same review, linting, and security scanning as human-written code before merge. No auto-merge of AI output.
 - Code suggested by AI assistants is reviewed by a human before merge. AI is not an approver.
 - Secrets, customer data, and proprietary algorithms are not pasted into external AI tools that don't carry Vervian's enterprise data-handling terms.
+- Which AI systems are sanctioned, what data each may touch, and when each may be used are recorded in `ai-tooling-policy.md`. A system not on that register is not authorised for Vervian or customer data.
 
-AI **agents** (assistants with tool, file, or network access, in development or embedded in a product) are an attack surface, not just a data-egress risk:
+### 10b. AI agents as an attack surface
+
+Agents (assistants with tool, file, or network access, in development or embedded in a product) are an attack surface, not just a data-egress risk:
 
 - **(blocking)** Agents never hold or use production credentials. An agent that needs production data works through an audited, least-privilege, read-only path approved per case.
-- Untrusted content an agent processes (customer tickets, uploaded files, web pages, third-party API responses) is treated as **data, not instructions**. Product features built on LLMs document their prompt-injection exposure and the mitigations (input isolation, tool allow-lists, output validation, human confirmation for irreversible actions).
+- Untrusted content an agent processes (customer tickets, uploaded files, web pages, third-party API responses) is treated as **data, not instructions**.
 - Tools and MCP servers granted to an agent follow least privilege: only the tools the task needs, write access only where the task writes.
+- Actions an agent takes against a Vervian system are logged with actor, tool, and outcome, per [section 8](#8-logging-and-audit).
+- **(blocking)** An agent does not deploy to production, delete data, or take any other irreversible action without a human-approved gate.
 - See `agent-guide.md` for AI assistant rules.
+
+### 10c. AI shipped inside a product
+
+Applies to any product feature backed by a model: chat, summarisation, extraction, retrieval-augmented generation, embedded agents.
+
+- **(blocking) Feature record.** Before an AI-backed feature is approved, its design records four things: what data leaves the environment, which provider and model receive it, what actions the model is authorised to trigger, and the data classification of both inputs and outputs (per [`data-classification-retention.md`](data-classification-retention.md#classification-tiers)). Kept in the product's architecture doc.
+- **(blocking) Prompt injection.** The feature documents its prompt-injection exposure and mitigations: input isolation, tool allow-lists, output validation, human confirmation for irreversible actions.
+- **(blocking) Output handling.** Model output is never executed, rendered, or passed to a downstream sink raw. It is validated and encoded exactly like any other untrusted input, per [section 11](#11-application-security).
+- **System prompts are not a security boundary.** No secrets, credentials, API keys, or security-critical rules are placed in a system prompt. Assume the prompt is extractable. Access control and filtering are enforced in the application layer, outside the model.
+- **Retrieval and vector stores.** Where a product embeds documents for retrieval: enforce tenant isolation on the vector store, apply the same access control as the source documents, and sanitise content before embedding. A poisoned or cross-tenant retrieval is a data breach, not a relevance bug.
+- **Model provenance.** Base models, fine-tunes, and embedding models are version-pinned and sourced from vetted providers. A model version is a dependency, and [section 6](#6-dependencies-and-supply-chain) applies to it.
+- **Consumption limits.** Every model-backed endpoint has input and output token ceilings, a request timeout, and rate limiting (per [section 11](#11-application-security)). Cost and call-volume anomalies raise an alert. Unbounded model consumption is both a denial-of-service vector and a direct financial loss.
+- **Adversarial testing before release.** Any AI-facing feature is tested against a prompt-injection and jailbreak suite before first release and before any change to its system prompt, tools, or model version. Failures at critical or high severity block release. The suite is maintained per product and grows with each real finding.
 
 ## 11. Application security
 
 Baseline: **OWASP ASVS Level 1** for every product. A product that handles regulated data (health, payment, children's data) may be held to **Level 2** through its product override, where the extra effort is justified, not by default for everything. The rules below are the controls most often violated; ASVS is the full catalogue behind them.
+
+**Design-time.** Insecure design is not fixable by code review, so it is caught before the code exists. Every new service, externally reachable feature, or AI-backed capability gets a written threat model before development starts. At Vervian's scale this is a short structured note, not a workshop: what an attacker would want here, how they would reach it, what stops them, and what is left unmitigated. Anything left unmitigated is either fixed, or recorded as an accepted risk in the product override with a review date. The note lives with the feature's design and is revisited when the design materially changes.
 
 - **(blocking)** All input from untrusted sources (network, user, file, third-party API) is validated before use: type, length, range, format.
 - **(blocking)** Database access uses parameterized queries or an ORM. No string-built SQL/NoSQL from user input.
@@ -150,8 +195,13 @@ The scope section names "a compromised pipeline corrupting outputs" as a worst c
 | Network exposure | Listening ports/endpoints in the architecture doc match a scan of the deployed product, checked per release |
 | TLS configuration | External scan run at least quarterly |
 | Logging | Log sample reviewed quarterly for accidental PII / secrets |
-| Incident response | One-page written incident plan per product, reviewed annually |
-| AI / agent rules | Agent credential and tool grants reviewed alongside the access review; prompt-injection exposure documented per LLM-backed feature |
+| Incident response | One-page written incident plan per product, reviewed annually. The plan names at least one AI-specific scenario (prompt injection leading to data exposure, agent taking an unauthorised action) |
+| Separation of duties | The compensating-control table above is reviewed annually and updated when headcount changes |
+| AI / agent rules | Agent credential and tool grants reviewed alongside the access review |
+| AI feature records | Feature record (data out, provider/model, authorised actions, classification) present in the architecture doc for every AI-backed feature |
+| AI adversarial testing | Prompt-injection and jailbreak suite results attached to the release, per AI-facing feature |
+| AI consumption limits | Token ceilings and rate limits configured; cost/volume alert exists and has been triggered at least once in test |
+| Threat modelling | Written threat-model note attached to each new service, external feature, or AI capability |
 | Application security | SAST in CI; annual `/vervian-security-audit` report per product |
 | Pipeline integrity | Branch-protection settings + pinned-action check, reviewed annually |
 | Backup security | Immutability/access-separation config reviewed annually with the restore exercise in [`reliability-availability.md`](reliability-availability.md#how-we-verify) |
@@ -164,9 +214,11 @@ None by default. Product-specific exceptions live in `product-overrides/` with s
 ## Sources
 
 - OWASP ASVS 4.x (the underlying control catalogue; levels set in [section 11](#11-application-security)).
-- OWASP Top 10 for LLM Applications (prompt injection and agent rules in [section 10](#10-ai-and-generated-code)).
+- OWASP Top 10 (the design-time and application-security rules in sections [10](#10-ai-and-generated-code) and [11](#11-application-security)).
+- OWASP Top 10 for LLM Applications, 2025 revision (all of [section 10c](#10c-ai-shipped-inside-a-product): prompt injection, improper output handling, supply chain, system prompt leakage, vector and embedding weaknesses, excessive agency, unbounded consumption).
 - NIST SP 800-218 (SSDF) and SLSA (pipeline integrity rules in [section 12](#12-build-pipeline-and-release-integrity)).
 - NCSC ransomware guidance (offline/immutable backup rule in [section 13](#13-backup-security)).
 - GDPR Article 32 (security of processing).
 - 2026-06-10 internal review of this standard (gaps: application security, pipeline and backup controls absent despite being named in scope; incident-response triage timing contradicted `privacy-gdpr.md`).
+- 2026-08-14 review against a client AI-DLC cybersecurity policy (client-confidential, held outside this repo). Gaps it exposed and this revision closed: no design-time threat modelling; no record of what an AI feature sends where; no controls for system prompt leakage, retrieval/vector isolation, model pinning, or unbounded consumption; no adversarial testing gate for AI-facing features; separation of duties assumed rather than stated. See also `control-framework-mapping.md`.
 - TBD: prior internal incidents that motivated specific rules. To be linked once the historical record is reviewed.

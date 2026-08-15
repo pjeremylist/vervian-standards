@@ -1,6 +1,6 @@
 # PR Non-Functional Review Checklist
 
-> Owner: Vervian · Last reviewed: 2026-07-18
+> Owner: Vervian · Last reviewed: 2026-08-14
 
 This checklist is the **gate** every pull request goes through. Skim it on every PR. For any item that *might* apply, click into the linked NFR or strategy doc and confirm.
 
@@ -28,6 +28,21 @@ If you are an AI assistant proposing a PR, walk this checklist explicitly in the
 - [ ] Logs do not contain secrets, tokens, or PII (see [`privacy-gdpr.md`](privacy-gdpr.md)).
 - [ ] If the change touches the installer/update path: signed correctly, no privilege escalation regression.
 - [ ] If the change touches CI/CD or release workflows: pipeline-integrity rules hold (see [`security.md`](security.md#12-build-pipeline-and-release-integrity)).
+- [ ] If the change adds a new service, externally reachable feature, or AI capability: a written threat-model note exists (see [`security.md`](security.md#11-application-security)).
+
+## AI · see [`security.md`](security.md#10-ai-and-generated-code)
+
+Skip this block only if the change touches no model, agent, or AI-generated code path.
+
+- [ ] **(blocking)** AI-generated code in this diff passed the same review, linting, and scanning as human-written code. Nothing was merged on the strength of the model having written it.
+- [ ] **(blocking)** Any AI system involved is on the register in `ai-tooling-policy.md`, and the data sent to it is within the class that register permits.
+- [ ] **(blocking)** For a new or changed AI-backed feature: the feature record exists (what data leaves, which provider and model, what actions the model can trigger, classification of inputs and outputs).
+- [ ] **(blocking)** Model output is validated and encoded before it is rendered, executed, or passed downstream. No raw model output reaches a sink.
+- [ ] **(blocking)** No secrets, credentials, or security-critical rules were placed in a system prompt.
+- [ ] Token ceilings, timeouts, and rate limits are set on any new model-backed endpoint, and a cost or volume alert covers it.
+- [ ] If the system prompt, tool set, or model version changed: the prompt-injection and jailbreak suite was re-run and passed.
+- [ ] If the change touches retrieval or a vector store: tenant isolation and source-document access control still hold; content is sanitised before embedding.
+- [ ] If an agent gained tool, file, or network access: the grant is least-privilege, and no irreversible action runs without a human gate.
 
 ## Privacy · see [`privacy-gdpr.md`](privacy-gdpr.md)
 
@@ -117,6 +132,7 @@ Paste this into the PR description and fill it in:
 
 ## NFR checklist
 - Security:   <which items applied, links to deeper notes>
+- AI:         <or "n/a, no model/agent/AI-generated code in this change">
 - Privacy:    ...
 - Data:       ...
 - Performance:...
