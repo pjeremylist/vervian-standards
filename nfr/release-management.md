@@ -31,6 +31,7 @@ Every release must clear:
 - [ ] Accessibility audit per [`accessibility.md`](accessibility.md) on UI-touching changes.
 - [ ] Performance benchmarks recorded per [`performance.md`](performance.md#5-measurement-and-evidence).
 - [ ] Connectivity-model claims still hold (see [`reliability-availability.md`](reliability-availability.md#2-connectivity-model)).
+- [ ] No open critical or high defects in the release scope (see `bug-severity-and-priority.md`).
 - [ ] Release notes drafted.
 
 ## 3. Approval
@@ -55,9 +56,13 @@ Every release has a documented rollback path. **A release that can't be rolled b
 
 ## 7. Hotfix flow
 
-When a regression or incident requires shipping faster than the regular cadence:
+When a regression or incident requires shipping faster than the regular cadence.
 
-> *To be defined.* Critical questions: how is "hotfix" declared? Which gates can be deferred (none in § 2 are skipped) and which run in an abbreviated form? The release still passes the gates before it ships.
+A hotfix is declared by severity, not by mood. A **critical** bug per `bug-severity-and-priority.md` is acted on immediately and shipped via a planned or patch release without waiting for approval. A **high** bug is fixed before the next planned release, which may move that release date. Medium and low go through the normal backlog.
+
+Removing the approval step does not remove the gates. The hotfix still clears § 2 before it ships.
+
+> *To be defined.* Which § 2 gates run in an abbreviated form on a hotfix, and what "abbreviated" means for each. None are skipped.
 
 ## 8. Do-not-disturb interaction
 

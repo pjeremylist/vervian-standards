@@ -2,8 +2,8 @@
   "name": "vervian-standards",
   "description": "Public subset of Vervian's engineering standards. Generated from a private source of truth.",
   "version": "1.0.0",
-  "generated": "2026-08-15T01:52:08.512Z",
-  "sourceCommit": "13a1c9ddbc192bbf54f9bf96e2cc39829d4e6145",
+  "generated": "2026-08-17T15:22:38.436Z",
+  "sourceCommit": "028bc468624cb89cd585b493831808bae9d23e86",
   "files": [
     {
       "path": "nfr/00-pr-nfr-review-checklist.md",
@@ -53,7 +53,7 @@
     {
       "path": "nfr/release-management.md",
       "title": "Release & Change Management",
-      "bytes": 5067
+      "bytes": 5525
     },
     {
       "path": "strategy/product-management.md",
