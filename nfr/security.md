@@ -109,8 +109,8 @@ Two distinct exposures live here and they need separating: **AI used to build th
 
 ### 10a. AI used to build the software
 
-- **(blocking)** All AI-generated code, configuration, and infrastructure-as-code is treated as untrusted input. It passes the same review, linting, and security scanning as human-written code before merge. No auto-merge of AI output.
-- Code suggested by AI assistants is reviewed by a human before merge. AI is not an approver.
+- **(blocking)** All AI-generated code, configuration, and infrastructure-as-code is treated as untrusted input. It passes the same review, linting, and security scanning as human-written code before merge. Nothing merges without that review having actually run.
+- An AI assistant may merge its own change once it has self-reviewed the diff, local tests and type checks pass, and CI or the preview build is green, and it reports the merge and deploy to the owner (see `agent-guide.md`, changed 2026-09-02). Changes to auth, billing, data deletion, or these standards still need the owner's direction first.
 - Secrets, customer data, and proprietary algorithms are not pasted into external AI tools that don't carry Vervian's enterprise data-handling terms.
 - Which AI systems are sanctioned, what data each may touch, and when each may be used are recorded in `ai-tooling-policy.md`. A system not on that register is not authorised for Vervian or customer data.
 

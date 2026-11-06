@@ -69,6 +69,7 @@ A processor is anyone who handles personal data on Vervian's behalf (cloud hosti
 - **(blocking)** DPA (Data Processing Agreement) in place. Standard Contractual Clauses where data crosses borders out of the EEA.
 - Sub-processors disclosed transparently to customers; customers given notice of changes per their contract.
 - Adding a new processor mid-development requires sign-off from the privacy owner (Vervian).
+- AI providers a product calls at runtime are processors. Each product declares them in its override file, per `ai-tooling-policy.md`.
 
 ## 6. International transfers
 

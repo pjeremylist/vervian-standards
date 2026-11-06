@@ -1,6 +1,6 @@
 # PR Non-Functional Review Checklist
 
-> Owner: Vervian · Last reviewed: 2026-08-14
+> Owner: Vervian · Last reviewed: 2026-11-06
 
 This checklist is the **gate** every pull request goes through. Skim it on every PR. For any item that *might* apply, click into the linked NFR or strategy doc and confirm.
 
@@ -76,6 +76,9 @@ Skip this block only if the change touches no model, agent, or AI-generated code
 
 - [ ] **(blocking)** The deployment gate holds: this change does not put more than one distinct product on the same repo, app, process, machine, or database, and a failure in it cannot degrade an unrelated product sharing infrastructure.
 - [ ] **(blocking)** No new paid infrastructure (app, machine, database, billed third-party service) is provisioned without the owner's approval.
+- [ ] **(blocking)** Nothing of a higher build tier gained a dependency on anything of a lower tier: no import, runtime call, shared data store, or shared deploy unit pointing from Durable to Stopgap, or from Stopgap to Sketch (see `architecture.md`).
+- [ ] Build tier is declared for any new codebase or deploy unit. A Stopgap states its business need, its seam, its owner, and its replace-by date (see `architecture.md`). An undeclared tier is read as Durable and held to the full baseline.
+- [ ] A shared dependency added or widened (design system, auth layer, gateway, shared client or schema) names its dependants and is Durable, not a Stopgap.
 - [ ] Any new service, deploy unit, or stack element has its decision recorded (what, why, alternatives, blast radius).
 - [ ] Services touched still own their data stores exclusively; no new cross-service database access.
 
@@ -139,6 +142,7 @@ Paste this into the PR description and fill it in:
 - Reliability:...
 - Accessibility:...
 - Overrides cited: <product-overrides/<product>.md section, or "none">
+- Build tier:  <Sketch | Stopgap | Durable; for a Stopgap, the replace-by date>
 
 ## Blast radius
 <which products / customers / surfaces are affected>
