@@ -2,8 +2,8 @@
   "name": "vervian-standards",
   "description": "Public subset of Vervian's engineering standards. Generated from a private source of truth.",
   "version": "1.0.0",
-  "generated": "2026-11-06T21:47:05.915Z",
-  "sourceCommit": "b99bff293c8b9c2d32ef1851a1cf86a321264353",
+  "generated": "2026-11-06T22:17:33.556Z",
+  "sourceCommit": "d99f2fcf8d33fdee939d95304a29362b8c3cb076",
   "files": [
     {
       "path": "nfr/00-pr-nfr-review-checklist.md",
