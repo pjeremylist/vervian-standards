@@ -2,13 +2,13 @@
   "name": "vervian-standards",
   "description": "Public subset of Vervian's engineering standards. Generated from a private source of truth.",
   "version": "1.0.0",
-  "generated": "2026-11-06T22:17:33.556Z",
-  "sourceCommit": "d99f2fcf8d33fdee939d95304a29362b8c3cb076",
+  "generated": "2026-11-07T18:34:19.706Z",
+  "sourceCommit": "c6ebf342b174b6f6f259c64ca19184c9540246c3",
   "files": [
     {
       "path": "nfr/00-pr-nfr-review-checklist.md",
       "title": "PR Non-Functional Review Checklist",
-      "bytes": 9829
+      "bytes": 10468
     },
     {
       "path": "nfr/coding-standards.md",
