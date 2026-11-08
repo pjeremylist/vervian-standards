@@ -15,4 +15,4 @@ requirements and craft docs that govern how Vervian builds software.
   rather than tracking `main`, so an upstream edit cannot change what you read
   out from under you.
 
-Version `1.0.0` · generated 2026-11-07T18:34:19.706Z
+Version `1.0.0` · generated 2026-11-08T17:50:39.714Z
